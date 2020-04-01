@@ -54,15 +54,17 @@ temp = 0
 BD = np.zeros(len(t) + 1)
 #set initial value
 BD[0] = 0.0
+sleepamount = 4.0
+sleepstart = 24.0 - sleepamount
 
 #run through the time domain solving for BD: 
 for i in t: 
-    if 16.0 < i < 24.0 or 40.0 < i < 48.0:
+    if sleepstart < i < 24.0 or sleepstart*2.0 < i < 48.0 or sleepstart*3.0 < i < 48.0:
         #scale rbt and rwt during sleep periods:
-        rwt = 0.06 / 2.0
-        rbt = 0.04 / 2.0
+        rwt = 0.06 * 1.0
+        rbt = 0.28 * 0.0010
     else: 
-        rbt = 0.04
+        rbt = 0.28
         rwt = 0.06
 
 #take an euler step
