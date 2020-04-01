@@ -49,11 +49,11 @@ def eulerStep(BD, rbt, rwt, dt, time, index):
 
 
 #grab a domain (24 hour window here)
-t, dt = np.linspace(0, 48, 1000, retstep = True) 
+t, dt = np.linspace(0, 72, 10000, retstep = True) 
 temp = 0
 BD = np.zeros(len(t) + 1)
 #set initial value
-BD[0] = 0.2
+BD[0] = 0.0
 
 #run through the time domain solving for BD: 
 for i in t: 
@@ -71,16 +71,14 @@ for i in t:
 
 
 #params stored in a vector, passed to model, pw, rw, rb, pb1: 
-params = [0.13, 0.06, 0.04, 1.7]
+params = [0.13, 0.06, 0.28, 1.7]
 
 
 #intial conditions I, R, D:  
-x0 = [0.1, 0.2, 0.2]
+x0 = [0.1, 0.2, 0.0]
 
-#initialize parameters (mc, A, sleepTime): 
 
 #compute the circadian process: 
-
 sol = solve_ivp(lambda t, x: sleepModel(t, x, params), [t[0], t[-1]], x0,  t_eval = t )
 
 
@@ -105,6 +103,6 @@ ax[1,0].set_title('Debt')
 #ax[1,1].set_title('circadian process')
 
 ax[1,1].plot(t, BD[:-1])
-ax[1,1].set_title('Debt')
+ax[1,1].set_title('Debt New')
 
 plt.show()
