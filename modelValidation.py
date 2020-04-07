@@ -90,27 +90,27 @@ if __name__ == "__main__":
     sol = solve_ivp(lambda t, x: sleepModel(t, x, params), [t[0], t[-1]], x0,  t_eval = t )
 
 
-#collect terms 
-I = sol.y[0]
-R = sol.y[1]
-D = sol.y[2]
-c = circadianProcess(t)
+    #collect terms 
+    I = sol.y[0]
+    R = sol.y[1]
+    D = sol.y[2]
+    c = circadianProcess(t)
 
-fig, ax = plt.subplots(2,2)
+    fig, ax = plt.subplots(2,2)
 
-ax[0,0].plot(t, I)
-ax[0,0].set_title('Investments')
+    ax[0,0].plot(t, I)
+    ax[0,0].set_title('Investments')
 
-ax[0,1].plot(t, R)
-ax[0,1].set_title('Requirements')
+    ax[0,1].plot(t, R)
+    ax[0,1].set_title('Requirements')
 
-ax[1,0].plot(t, D)
-ax[1,0].set_title('Debt')
+    ax[1,0].plot(t, D)
+    ax[1,0].set_title('Debt')
 
-#ax[1,1].plot(t, c)
-#ax[1,1].set_title('circadian process')
+    #ax[1,1].plot(t, c)
+    #ax[1,1].set_title('circadian process')
 
-ax[1,1].plot(t, BD[:-1])
-ax[1,1].set_title('Debt New')
+    ax[1,1].plot(t, bioDebt[:-1])
+    ax[1,1].set_title('Debt New')
 
-plt.show()
+    plt.show()
