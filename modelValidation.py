@@ -46,42 +46,48 @@ def eulerStep(BD, rbt, rwt, dt, time, index):
     BD[index+1] = BD[index] + dt*(pw*rwt + pb1*rbt*BD[index] - rbt*xb)
 
 
+def computeDebt(t, dt, sleepAmount):
 
+    temp = 0
+    BD = np.zeros(len(t) + 1)
+    #set initial value
+    BD[0] = 0.0
+    sleepstart = 24.0 - sleepAmount
 
+    for i in t: 
+        if sleepstart < i < 24.0 or sleepstart*2.0 < i < 48.0 or sleepstart*3.0 < i < 48.0:
+         #scale rbt and rwt during sleep periods:
+            rwt = 0.06 * 1.0
+            rbt = 0.28 * 0.0010
+        else: 
+            rbt = 0.28
+            rwt = 0.06
+
+    #take an euler step
+        eulerStep(BD, rbt, rwt, dt, i, temp)
+        temp += 1 
+
+    #return solution
+    return BD
+
+#main: 
+if __name__ == "__main__":
+    
 #grab a domain (24 hour window here)
-t, dt = np.linspace(0, 72, 10000, retstep = True) 
-temp = 0
-BD = np.zeros(len(t) + 1)
-#set initial value
-BD[0] = 0.0
-sleepamount = 4.0
-sleepstart = 24.0 - sleepamount
+    t, dt = np.linspace(0, 72, 10000, retstep = True) 
 
-#run through the time domain solving for BD: 
-for i in t: 
-    if sleepstart < i < 24.0 or sleepstart*2.0 < i < 48.0 or sleepstart*3.0 < i < 48.0:
-        #scale rbt and rwt during sleep periods:
-        rwt = 0.06 * 1.0
-        rbt = 0.28 * 0.0010
-    else: 
-        rbt = 0.28
-        rwt = 0.06
+    sleepamount = 4.0
+    sleepstart = 24.0 - sleepamount
+    bioDebt = computeDebt(t, dt, sleepamount)
 
-#take an euler step
-    eulerStep(BD, rbt, rwt, dt, i, temp)
-    temp += 1 
+    #params stored in a vector, passed to model, pw, rw, rb, pb1: 
+    params = [0.13, 0.06, 0.28, 1.7]
 
+    #intial conditions I, R, D:  
+    x0 = [0.1, 0.2, 0.0]
 
-#params stored in a vector, passed to model, pw, rw, rb, pb1: 
-params = [0.13, 0.06, 0.28, 1.7]
-
-
-#intial conditions I, R, D:  
-x0 = [0.1, 0.2, 0.0]
-
-
-#compute the circadian process: 
-sol = solve_ivp(lambda t, x: sleepModel(t, x, params), [t[0], t[-1]], x0,  t_eval = t )
+    #compute bd via ivp solver (for testing)
+    sol = solve_ivp(lambda t, x: sleepModel(t, x, params), [t[0], t[-1]], x0,  t_eval = t )
 
 
 #collect terms 
