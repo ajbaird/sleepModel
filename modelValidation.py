@@ -33,11 +33,10 @@ def sleepModel(t, x, params):
     return [dIdt, dRdt, dDdt]
 
 #custom evaluations in order to change parameters to reflect metabolic rate
-def eulerStep(BD, rbt, rwt, dt, time, index):
+def eulerStep(BD, rbt, rwt, pw, pb1, dt, time, index):
 
     #hard code these for now:
-    pw = 0.13
-    pb1 = 1.7
+
 
     ct = circadianProcess(time)
     xb = ct * (BD[index] / (1 + BD[index]**2))
@@ -46,7 +45,7 @@ def eulerStep(BD, rbt, rwt, dt, time, index):
     BD[index+1] = BD[index] + dt*(pw*rwt + pb1*rbt*BD[index] - rbt*xb)
 
 
-def computeDebt(t, dt, sleepAmount):
+def computeDebt(t, dt, sleepAmount, paramrbt, paramrwt, parampw, parampb1):
 
     temp = 0
     BD = np.zeros(len(t) + 1)
@@ -55,16 +54,20 @@ def computeDebt(t, dt, sleepAmount):
     sleepstart = 24.0 - sleepAmount
 
     for i in t: 
-        if sleepstart < i < 24.0 or sleepstart*2.0 < i < 48.0 or sleepstart*3.0 < i < 48.0:
+        if sleepstart < i < 24.0 or (48 - sleepAmount) < i < 48.0 or (72 - sleepAmount) < i < 72.0:
          #scale rbt and rwt during sleep periods:
-            rwt = 0.06 * 1.0
-            rbt = 0.28 * 0.0010
+            rbt = 0.28 * paramrbt
+            rwt = 0.06 * paramrwt
+            pw = 0.13 * parampw
+            pb1 = 1.7 * parampb1
         else: 
             rbt = 0.28
             rwt = 0.06
+            pw = 0.13 
+            pb1 = 1.7
 
-    #take an euler step
-        eulerStep(BD, rbt, rwt, dt, i, temp)
+        #take an euler step
+        eulerStep(BD, rbt, rwt, pw, pb1, dt, i, temp)
         temp += 1 
 
     #return solution
@@ -76,9 +79,15 @@ if __name__ == "__main__":
 #grab a domain (24 hour window here)
     t, dt = np.linspace(0, 72, 10000, retstep = True) 
 
-    sleepamount = 4.0
+    sleepamount = 8.0
+    paramrbt = 1.00
+    paramrwt = 1.0
+    parampw = 1.0
+    parampb1 = 1.0
     sleepstart = 24.0 - sleepamount
-    bioDebt = computeDebt(t, dt, sleepamount)
+    bioDebtNormal = computeDebt(t, dt, sleepamount, paramrbt, paramrwt, parampw, parampb1)
+    bioDebtSleepy = computeDebt(t, dt, sleepamount/2.0, paramrbt, paramrwt, parampw, parampb1)
+    bioDebtAwake =  computeDebt(t, dt, sleepamount * 2.0, paramrbt, paramrwt, parampw, parampb1)
 
     #params stored in a vector, passed to model, pw, rw, rb, pb1: 
     params = [0.13, 0.06, 0.28, 1.7]
@@ -96,21 +105,18 @@ if __name__ == "__main__":
     D = sol.y[2]
     c = circadianProcess(t)
 
-    fig, ax = plt.subplots(2,2)
+    fig, ax = plt.subplots(3, sharex=True, sharey=True)
 
-    ax[0,0].plot(t, I)
-    ax[0,0].set_title('Investments')
+    ax[0].plot(t, bioDebtNormal[:-1])
+    ax[0].set_title('Debt')
 
-    ax[0,1].plot(t, R)
-    ax[0,1].set_title('Requirements')
+    ax[1].plot(t, bioDebtSleepy[:-1])
+    ax[1].set_title('Debt sleep half')
 
-    ax[1,0].plot(t, D)
-    ax[1,0].set_title('Debt')
+    ax[2].plot(t, bioDebtAwake[:-1])
+    ax[2].set_title('Debt sleep double')
 
-    #ax[1,1].plot(t, c)
-    #ax[1,1].set_title('circadian process')
-
-    ax[1,1].plot(t, bioDebt[:-1])
-    ax[1,1].set_title('Debt New')
+    plt.tight_layout()
+    #plt.savefig('normalParamsPB10p5.png', dpi=300 )
 
     plt.show()
