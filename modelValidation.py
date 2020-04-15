@@ -4,13 +4,13 @@ from scipy.integrate import solve_ivp
 
 # system of equations 
 def circadianProcess (time):
-    params = [5.0, 2.5, 8.0]
+    params = [5.0, 2.5, 2.0]
     mc = params[0]
     A = params[1]
     sleepTime = params[2]
 
     #scaling this equation to get it in units of hours
-    c = mc - A*np.sin((2*np.pi/24.0)*(time - 0.25 + 0.5*(sleepTime/24.0)))
+    c = mc - (0.8*A)*np.sin((2*np.pi/24.0)*time*(0.5*(sleepTime/24.0)))
 
     return c
 
@@ -79,10 +79,10 @@ if __name__ == "__main__":
 #grab a domain (24 hour window here)
     t, dt = np.linspace(0, 72, 10000, retstep = True) 
 
-    sleepamount = 8.0
-    paramrbt = 1.00
-    paramrwt = 1.0
-    parampw = 1.0
+    sleepamount = 2.0
+    paramrbt = 1.1#1.00
+    paramrwt = 0.01#1.0
+    parampw = 1.0#1.0
     parampb1 = 1.0
     sleepstart = 24.0 - sleepamount
     bioDebtNormal = computeDebt(t, dt, sleepamount, paramrbt, paramrwt, parampw, parampb1)
@@ -117,6 +117,10 @@ if __name__ == "__main__":
     ax[2].set_title('Debt sleep double')
 
     plt.tight_layout()
-    #plt.savefig('normalParamsPB10p5.png', dpi=300 )
+    #plt.savefig('HighA2HoursRateLimitRW0p1.png', dpi=300 )
+
+    #plt.savefig('lowA8HoursRateLimitRW0p1.png', dpi=300 )
+    #plt.savefig('highA2HoursRateLimitRW0p01.png', dpi=300 )
+
 
     plt.show()
